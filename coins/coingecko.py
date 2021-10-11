@@ -8,7 +8,7 @@ class CoinGecko():
                  id: str = 'binancecoin',
                  vs_currency: str = 'usd',
                  days: int = 365):
-        self.path = path
+        self.path = "../data/" + path
         self.id = id
         self.vs_currency = vs_currency
         self.days = days
