@@ -6,10 +6,12 @@ import pandas as pd
 class SplitData():
 
     def __init__(self, input_path: str = 'input_data.csv',
+                 data_path: str = './',
                  n_split_rows: int = 30,
                  sma_lenght: int = 30):
 
         self.input_path = input_path
+        self.data_path = data_path
         self.n_split_rows = n_split_rows
         self.sma_lenght = sma_lenght
 
@@ -34,11 +36,13 @@ class SplitData():
                 if line == '':
                     # end of file
                     if len(lines):
-                        self.write_csv(f"slice{output_file_index:04}.csv",
-                                       lines)
+                        self.write_csv(
+                            f"{self.data_path}slice{output_file_index:04}.csv",
+                            lines)
                     if len(sma_lines):
-                        self.write_csv(f"sma{self.sma_lenght}.csv",
-                                       sma_lines)
+                        self.write_csv(
+                            f"{self.data_path}sma{self.sma_lenght}.csv",
+                            sma_lines)
                     break
 
                 # slice files
@@ -46,8 +50,9 @@ class SplitData():
                     lines.append(line)
                     line_index += 1
                 else:
-                    self.write_csv(f"slice{output_file_index:04}.csv",
-                                   lines)
+                    self.write_csv(
+                        f"{self.data_path}slice{output_file_index:04}.csv",
+                        lines)
                     lines = [line]
                     line_index = 1
                     output_file_index += 1
@@ -72,7 +77,7 @@ class SplitData():
             n_parts += 1
         for i in range(n_parts):
             df_slice = df.iloc[i*self.n_split_rows:(i+1)*self.n_split_rows]
-            df_slice.to_csv(path_or_buf=f"slice{i+1:04}.csv",
+            df_slice.to_csv(path_or_buf=f"{self.data_path}slice{i+1:04}.csv",
                             header=False)
 
     def sma_with_df(self):
@@ -84,7 +89,8 @@ class SplitData():
         # write sma file
         sma = df['close'].rolling(self.sma_lenght).mean()
         df_sma = df[sma < df['close']]
-        df_sma.to_csv(path_or_buf=f"sma{self.sma_lenght}.csv", header=False)
+        df_sma.to_csv(path_or_buf=f"{self.data_path}sma{self.sma_lenght}.csv",
+                      header=False)
 
 
 if __name__ == '__main__':
