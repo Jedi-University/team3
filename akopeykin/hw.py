@@ -1,8 +1,8 @@
 from functools import reduce
 
 def exercise_1():
-    f = lambda x: list(map(lambda y: x+y, a))
-    a = ["a", "b", "c"]
+    func = lambda a,b,c: lambda x: [x+a, x+b, x+c]
+    f = func("a", "b", "c")
     print(f("x"))
 
 
