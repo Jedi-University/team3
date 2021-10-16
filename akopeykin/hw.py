@@ -20,3 +20,13 @@ def exercise_3():
 
     for x in super_range(10):
         print(x)
+
+def exercise_4():
+    def a(x,y):
+        print(f"{x} - {y}")
+        
+    def caller(func, c, j):
+        return lambda x,y: func(c+x, j+y)
+
+    f = caller(a, "100", "200")
+    f("h", "z")
