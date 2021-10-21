@@ -30,3 +30,43 @@ def exercise_4():
 
     f = caller(a, "100", "200")
     f("h", "z")
+
+
+import random
+def exercise_5():
+
+    class Student():
+
+        def __init__(self, name, age, gender, class_number, speciality):
+            self.name = name
+            self.age = age
+            self.gender = gender
+            self.class_number = class_number
+            self.speciality = speciality
+
+        def think(self):
+            return random.randint(0, 10)
+
+        def speak(self, t):
+            return t + 10
+
+        def sum(self, a, b):
+            return a + b
+
+    class Lecturer():
+
+        def __init__(self, name, age, gender, speciality, experience):
+            self.name = name
+            self.age = age
+            self.gender = gender
+            self.experience = experience
+            self.speciality = speciality
+
+        def think(self):
+            return random.randint(0, 10)
+
+        def speak(self, t):
+            return t + 10 + self.experience
+
+        def answer(self, v):
+            return v ** 10
