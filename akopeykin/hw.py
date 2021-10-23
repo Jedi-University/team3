@@ -70,3 +70,24 @@ def exercise_5():
 
         def answer(self, v):
             return v ** 10
+
+def exercise_6():
+    def decor_with_args(*args, **kwargs):
+        print(f'decor_with_args: args={args}, kwargs={kwargs}')
+        decor_arg = args[0]
+        def decor(*args, **kwargs):
+            print(f'decor: args={args}, kwargs={kwargs}')
+            fun = args[0]
+            def wrap(*args, **kwargs):
+                print(f'wrap: args={args}, kwargs={kwargs}')
+                x = args[0]
+                fun(f'{x}+{decor_arg}')
+            return wrap
+        return decor
+
+    @decor_with_args('d')
+    def a(x):
+        print(x)
+
+    print('===')
+    a('a')
