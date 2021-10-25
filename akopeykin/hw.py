@@ -71,7 +71,7 @@ def exercise_5():
         def answer(self, v):
             return v ** 10
 
-def exercise_6():
+def exercise_6_0():
     def decor_with_args(*args, **kwargs):
         print(f'decor_with_args: args={args}, kwargs={kwargs}')
         decor_arg = args[0]
@@ -91,3 +91,27 @@ def exercise_6():
 
     print('===')
     a('a')
+
+def exercise_6():
+    from datetime import datetime, time
+    import time
+
+    def decor_with_args(min: bool=False):
+        def decor(function):
+            def wrap(timeout: int):
+                start_time = datetime.now()
+                function(timeout)
+                time_delta = datetime.now() - start_time
+                if min:
+                    print(f'minutes: {time_delta.total_seconds()/60}')
+                else:
+                    print(f'seconds: {time_delta.total_seconds()}')
+            return wrap
+        return decor
+
+
+    @decor_with_args(min=False)
+    def a(x: int):
+        time.sleep(x)
+
+    a(2)
