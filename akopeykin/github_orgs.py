@@ -10,50 +10,66 @@ from githubcred import password, user
 # user = ''
 # password = ''
 DB_PATH = 'sqlalchemy.db'
-ORGS_NUMBER = 200
-NUMBER_OF_TOP = 20
+ORGS_N = 200
+TOPS_N = 20
 
 Base = declarative_base()
 
 
 class GHub():
 
-    def __init__(self):
-        pass
+    def __init__(self, per_page: int = 100):
+        self.per_page = per_page
 
-    def get_api_response(self, url, querystring={}) -> requests.Response:
+    def get_api_response(self, url, **kwargs) -> requests.Response:
+        params = kwargs
         headers = {'Accept': 'application/vnd.github.v3+json'}
         response = requests.request(
             "GET", url, headers=headers,
-            params=querystring,
+            params=params,
             auth=requests.auth.HTTPBasicAuth(user, password))
         return response
 
-    def get_orgs(self, orgs_number: int = 30):
+    def get_orgs_url(self, orgs_n: int = 30):
         url = (f"https://api.github.com/organizations")
-        result = []
-        while len(result) < orgs_number:
-            response = self.get_api_response(url)
+        orgs = []
+        while len(orgs) < orgs_n:
+            response = self.get_api_response(url, per_page=self.per_page)
             # print(response, len(response.json()))
-            url = response.links['next']['url']
-            result += response.json()
-        return result[:orgs_number]
+            if 'next' in response.links:
+                url = response.links['next']['url']
+                orgs.extend(response.json())
+            else:
+                break
+        orgs = orgs[:orgs_n]
+        repos_url = list(map(lambda x: x['repos_url'], orgs))
+        return repos_url
 
-    def get_repos(self, orgs_number: int = 200):
-        orgs = self.get_orgs(orgs_number=orgs_number)
-        result = []
-        for row in orgs:
-            org_name = row['login']
-            url = row['repos_url']
-            response = self.get_api_response(url)
+    def repo_mapper(self, repo: dict) -> dict:
+        return {'id': repo['id'],
+                'org_name': repo['owner']['login'],
+                'repo_name': repo['name'],
+                'stars_count': repo['stargazers_count']}
+
+    def get_repos(self, orgs_n: int, tops_n: int):
+        repos_url = self.get_orgs_url(orgs_n=orgs_n)
+        top_repos = []
+        for url in repos_url:
+            response = self.get_api_response(url, per_page=self.per_page)
             repos = response.json()
-            res = [{'id': repo['id'],
-                    'org_name': org_name,
-                    'stars_count': repo['stargazers_count'],
-                    'repo_name': repo['name']} for repo in repos]
-            result += res
-        result.sort(key=lambda x: x['stars_count'], reverse=True)
-        return result
+            repos_info = list(map(self.repo_mapper, repos))
+            while 'next' in response.links:
+                url = response.links['next']['url']
+                response = self.get_api_response(url)
+                cur_repos = response.json()
+                cur_repos_info = map(self.repo_mapper, cur_repos)
+                repos_info.extend(cur_repos_info)
+
+            top_repos.extend(repos_info)
+            top_repos.sort(key=lambda x: x['stars_count'], reverse=True)
+            top_repos = top_repos[:tops_n]
+
+        return top_repos
 
 
 class Top(Base):
@@ -71,9 +87,8 @@ class GHubSQL():
         Base.metadata.create_all(self.engine)
         self.DBSession = sessionmaker(bind=self.engine)
 
-    def fetch(self, number_of_top: int = 20, orgs_number: int = 200):
-        tops = GHub().get_repos(orgs_number=orgs_number)
-        tops = tops[:number_of_top]
+    def fetch(self, **kwargs):
+        tops = GHub().get_repos(**kwargs)
         session = self.DBSession()
         session.execute(delete(Top))
 
@@ -94,7 +109,8 @@ class GHubSQL():
 if __name__ == '__main__':
     # pass
     # result = GHub().get_orgs()
-    # result = GHub().get_repos()
+    # result = GHub().get_repos(tops_n=TOPS_N, orgs_n=ORGS_N)
+    # print(result)
     gh = GHubSQL(db_path=DB_PATH)
-    gh.fetch(number_of_top=NUMBER_OF_TOP, orgs_number=ORGS_NUMBER)
+    gh.fetch(tops_n=TOPS_N, orgs_n=ORGS_N)
     gh.show()
