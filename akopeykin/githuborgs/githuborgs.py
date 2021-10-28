@@ -1,6 +1,3 @@
-from datetime import date, datetime, time, timedelta
-from functools import reduce
-from json.decoder import JSONDecodeError
 from multiprocessing import Pool
 
 import requests
@@ -8,10 +5,11 @@ from sqlalchemy import Column, Integer, String, create_engine, delete
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from githubcred import password, user
+# from githubcred import cred
 
-# user = ''
-# password = ''
+# cred = {'user': '',
+#         'password': ''}
+
 DB_PATH = 'sqlalchemy.db'
 ORGS_N = 200
 TOPS_N = 20
@@ -22,10 +20,15 @@ Base = declarative_base()
 
 class GHub():
 
-    def __init__(self, tops_n: int, orgs_n: int, per_page: int = 100):
+    def __init__(self, tops_n: int, orgs_n: int,
+                 user: str, password: str, per_page: int = 100,
+                 processes: int = 2):
         self.per_page = per_page
         self.tops_n = tops_n
         self.orgs_n = orgs_n
+        self.user = user
+        self.password = password
+        self.processes = processes
 
     def get_api_response(self, url, **kwargs) -> requests.Response:
         params = kwargs
@@ -33,7 +36,7 @@ class GHub():
         response = requests.request(
             "GET", url, headers=headers,
             params=params,
-            auth=requests.auth.HTTPBasicAuth(user, password))
+            auth=requests.auth.HTTPBasicAuth(self.user, self.password))
         return response
 
     def get_orgs_url(self):
@@ -78,23 +81,22 @@ class GHub():
         return top_repos
 
     def repos_worker(self, url):
-            response = self.get_api_response(url, per_page=self.per_page)
-            repos = response.json()
-            repos_info = list(map(self.repo_mapper, repos))
-            while 'next' in response.links:
-                url = response.links['next']['url']
-                response = self.get_api_response(url)
-                cur_repos = response.json()
-                cur_repos_info = map(self.repo_mapper, cur_repos)
-                repos_info.extend(cur_repos_info)
-            repos_info.sort(key=lambda x: x['stars_count'], reverse=True)
-            top_repos = repos_info[:self.tops_n]
-            return top_repos
-
+        response = self.get_api_response(url, per_page=self.per_page)
+        repos = response.json()
+        repos_info = list(map(self.repo_mapper, repos))
+        while 'next' in response.links:
+            url = response.links['next']['url']
+            response = self.get_api_response(url)
+            cur_repos = response.json()
+            cur_repos_info = map(self.repo_mapper, cur_repos)
+            repos_info.extend(cur_repos_info)
+        repos_info.sort(key=lambda x: x['stars_count'], reverse=True)
+        top_repos = repos_info[:self.tops_n]
+        return top_repos
 
     def get_repos(self):
         repos_url = self.get_orgs_url()
-        with Pool(processes=PROCESSES) as pool:
+        with Pool(processes=self.processes) as pool:
             result = pool.map(self.repos_worker, repos_url)
 
         # top_repos = reduce(lambda x,y: x+y, result)
@@ -140,11 +142,6 @@ class GHubSQL():
 
 
 if __name__ == '__main__':
-    # pass
-    # result = GHub().get_orgs()
-    # result = GHub(tops_n=TOPS_N, orgs_n=ORGS_N).get_repos()
-    # result = GHub(tops_n=TOPS_N, orgs_n=ORGS_N).get_repos_sec()
-    # print(result)
     gh = GHubSQL(db_path=DB_PATH)
-    gh.fetch(tops_n=TOPS_N, orgs_n=ORGS_N)
+    gh.fetch(tops_n=TOPS_N, orgs_n=ORGS_N, processes=PROCESSES, **cred)
     gh.show()
