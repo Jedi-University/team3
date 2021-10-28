@@ -8,7 +8,7 @@ from sqlalchemy import Column, Integer, String, create_engine, delete
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# from githubcred import password, user
+from githubcred import password, user
 
 # user = ''
 # password = ''
@@ -97,7 +97,8 @@ class GHub():
         with Pool(processes=PROCESSES) as pool:
             result = pool.map(self.repos_worker, repos_url)
 
-        top_repos = reduce(lambda x,y: x+y, result)
+        # top_repos = reduce(lambda x,y: x+y, result)
+        top_repos = sum(result, [])
         top_repos.sort(key=lambda x: x['stars_count'], reverse=True)
         top_repos = top_repos[:self.tops_n]
 
