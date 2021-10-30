@@ -1,31 +1,37 @@
-from multiprocessing import Pool
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+# from multiprocessing import Pool
 
 
 class Orch():
+
+    def __init__(self, max_workers: int = 1, **kwargs) -> None:
+        self.max_workers = max_workers
+
     def run(self):
         pass
 
 
 class SeqOrch(Orch):
-    def __init__(*args, **kwargs) -> None:
-        pass
 
     def run(self, worker, tasks: list) -> list:
         return list(map(worker, tasks))
 
 
 class PoolOrch(Orch):
-    def __init__(self, processes: int = 1, **kwargs) -> None:
-        self.processes = processes
 
     def run(self, worker, tasks: list) -> list:
-        with Pool(processes=self.processes) as pool:
-            result = pool.map(worker, tasks)
+        with ProcessPoolExecutor(max_workers=self.max_workers) as executor:
+        # with Pool(processes=self.max_workers) as pool:
+            result = executor.map(worker, tasks)
         return result
 
 
 class TreadOrch(Orch):
-    pass
+
+    def run(self, worker, tasks: list) -> list:
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            result = executor.map(worker, tasks)
+        return result
 
 
 class AsincOrch(Orch):
