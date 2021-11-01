@@ -1,6 +1,5 @@
-from git_app_config import config, db, ghubdata, orch
-from githubcred import cred
-from githuborgs.orch import Orch
+from git_app_config import db, ghubdata
+from datetime import datetime
 
 
 class App():
@@ -22,5 +21,10 @@ class App():
 
 if __name__ == '__main__':
     app = App(ghubdata=ghubdata, db=db)
+    start_time = datetime.now()
     app.fetch()
-    app.show()
+    time_delta = datetime.now() - start_time
+    print(f'seconds: {time_delta.total_seconds()}')
+
+
+    # app.show()

@@ -1,6 +1,6 @@
 import requests
 
-from githuborgs.orch import Orch
+from orch.orch import Orch
 
 
 class GHubData():
@@ -22,6 +22,8 @@ class GHubData():
             "GET", url, headers=headers,
             params=params,
             auth=requests.auth.HTTPBasicAuth(self.user, self.password))
+        if response.status_code != 200:
+            print(response.status_code, response.text)
         return response
 
     def get_orgs_url(self):
