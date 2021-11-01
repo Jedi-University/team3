@@ -1,5 +1,6 @@
-from git_app_config import db, ghubdata
 from datetime import datetime
+
+from git_app_config import db, ghubdata
 
 
 class App():
@@ -25,6 +26,5 @@ if __name__ == '__main__':
     app.fetch()
     time_delta = datetime.now() - start_time
     print(f'seconds: {time_delta.total_seconds()}')
-
 
     # app.show()

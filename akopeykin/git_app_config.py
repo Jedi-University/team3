@@ -1,11 +1,10 @@
 from githubcred import cred
 from githuborgs.db import DB, Top
 from githuborgs.githubdata import GHubData
-# from githuborgs.orch import PoolOrch, SeqOrch, TreadOrch, AsyncOrch
-from orch.seq_orch import SeqOrch
-from orch.process_orch import ProcessOrch
-from orch.tread_orch import TreadOrch
 from orch.async_orch import AsyncOrch
+from orch.process_orch import ProcessOrch
+from orch.seq_orch import SeqOrch
+from orch.tread_orch import TreadOrch
 
 config = {'orgs_n': 20,
           'tops_n': 20,
