@@ -5,7 +5,10 @@ from orch.orch import Orch
 
 class TreadOrch(Orch):
 
-    def run(self, worker, tasks: list) -> list:
+    def run(self) -> list:
+        orgs_repos_url = self.workers[0].run()
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            result = executor.map(worker, tasks)
-        return result
+            top_repos = executor.map(self.workers[1].run, orgs_repos_url)
+        repos = sum(top_repos, [])
+        top = self.workers[2].run(repos)
+        return top

@@ -1,15 +1,15 @@
 from datetime import datetime
 
-from git_app_config import db, ghubdata
+from git_app_config import db, orch, config
 
 
 class App():
-    def __init__(self, ghubdata, db):
-        self.ghubdata = ghubdata
+    def __init__(self, orch, db):
+        self.orch = orch
         self.db = db
 
     def fetch(self):
-        top = self.ghubdata.get_top()
+        top = self.orch.run()
         db.load(top=top)
 
     def show(self):
@@ -21,10 +21,9 @@ class App():
 
 
 if __name__ == '__main__':
-    app = App(ghubdata=ghubdata, db=db)
+    app = App(orch=orch, db=db)
     start_time = datetime.now()
     app.fetch()
     time_delta = datetime.now() - start_time
     print(f'seconds: {time_delta.total_seconds()}')
-
-    # app.show()
+    app.show()
