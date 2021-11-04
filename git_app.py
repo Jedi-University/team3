@@ -9,8 +9,9 @@ class App():
         self.db = db
 
     def fetch(self):
+        db.delete()
         top = self.orch.run()
-        db.load(top=top)
+        db.store(top=top)
 
     def show(self):
         top = db.get()

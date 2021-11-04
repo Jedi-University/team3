@@ -1,6 +1,7 @@
 from api.requests_async import RequestsAsync
 from api.requests_sync import RequestsSync
-from db.db import DB, Top
+from db.db import DB
+from db.top import Top
 from githubcred import cred
 from orch.async_orch import AsyncOrch
 from orch.process_orch import ProcessOrch
@@ -15,7 +16,7 @@ from worker.worker_stars_top import WorkerStarsTop
 db_path = 'sqlalchemy.db'
 db = DB(db_path=db_path, table=Top)
 
-config_orgs_top = {'orgs_n': 200,
+config_orgs_top = {'orgs_n': 2,
                    'tops_n': 20}
 
 # Sync requests
@@ -35,10 +36,10 @@ workers = {'orgs': WorkerGHOrgs(**config),
 # orch = SeqOrch(workers=workers)
 
 # processPool
-orch = ProcessOrch(workers=workers, max_workers=max_workers)
+# orch = ProcessOrch(workers=workers, max_workers=max_workers)
 
 # treadPool
-# orch = TreadOrch(workers=workers, max_workers=max_workers)
+orch = TreadOrch(workers=workers, max_workers=max_workers)
 
 
 # Async requests
