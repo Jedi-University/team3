@@ -5,22 +5,9 @@ from api.requests import Requests
 
 class RequestsAsync(Requests):
 
-    # def __init__(self, session, user: str, password: str,
     def __init__(self, user: str, password: str,
                  *args, **kwargs):
         self.auth = aiohttp.BasicAuth(user, password)
-
-    # async def get(self, url, **kwargs):
-    #     if not hasattr(self, 'session'):
-    #         self.session = aiohttp.ClientSession()
-    #     params = kwargs
-    #     headers = {'Accept': 'application/vnd.github.v3+json'}
-    #     response = await self.session.get(url)
-    #     # print(f'[RequestsAsync] {type(response)} {response.links}')
-    #     # print(f'[RequestsAsync] {await response.json()}')
-    #     # async with resp:
-    #     #     assert resp.status == 200
-    #     return response
 
     async def get(self, url, **kwargs):
         params = kwargs
@@ -35,7 +22,3 @@ class RequestsAsync(Requests):
                     result['url'] = response.links['next']['url']
 
         return result
-
-
-if __name__ == '__main__':
-    pass

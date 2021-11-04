@@ -23,7 +23,3 @@ class WorkerGHRepos(WorkerGH):
             repos.extend(cur_repos)
         repos = self.get_stars_top(repos)
         return repos
-
-
-if __name__ == '__main__':
-    pass

@@ -16,7 +16,3 @@ class RequestsSync(Requests):
                                     params=params,
                                     auth=self.auth)
         return response
-
-
-if __name__ == '__main__':
-    pass

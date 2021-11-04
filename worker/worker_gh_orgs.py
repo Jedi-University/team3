@@ -22,7 +22,3 @@ class WorkerGHOrgs(WorkerGH):
         orgs = orgs[:self.orgs_n]
         repos_url = list(map(lambda x: x['repos_url'], orgs))
         return repos_url
-
-
-if __name__ == '__main__':
-    pass
