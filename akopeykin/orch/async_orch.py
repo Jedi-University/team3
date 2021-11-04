@@ -1,52 +1,28 @@
 import asyncio
-import random
-import time
 
 from orch.orch import Orch
 
+
 class AsyncOrch(Orch):
 
-    def run(self, worker, tasks: list) -> list:
+    def run(self) -> list:
+        top = asyncio.run(self.async_run())
+        return top
 
-        async def async_worker(worker, queue_in, queue_out, name):
-            while True:
-                task = await queue_in.get()
-                print(f'{name} task {task}')
-                await asyncio.sleep(0)
-                r = worker(task)
-                queue_out.put_nowait(r)
-                queue_in.task_done()
+    async def async_run(self) -> list:
+        worker_orgs = self.workers['orgs'].run
+        worker_repos = self.workers['repos'].run
+        worker_top = self.workers['top'].run
 
-        async def async_run(worker, tasks):
+        orgs_repos_url = await worker_orgs()
 
-            queue_in = asyncio.Queue()
-            queue_out = asyncio.Queue()
+        ## not concurrent
+        # top_repos = [await worker_repos(r) for r in orgs_repos_url]
+        # concurrent
+        tasks = [worker_repos(r) for r in orgs_repos_url]
+        top_repos = await asyncio.gather(*tasks)
 
-            for task in tasks:
-                queue_in.put_nowait(task)
+        repos = sum(top_repos, [])
+        top = worker_top(repos)
 
-            async_tasks = []
-            for i in range(self.max_workers):
-                task = asyncio.create_task(async_worker(
-                    worker, queue_in, queue_out, f'name{i}'))
-                async_tasks.append(task)
-
-            await queue_in.join()
-
-            # Cancel our worker tasks.
-            for task in async_tasks:
-                task.cancel()
-            # Wait until all worker tasks are cancelled.
-            a = await asyncio.gather(*async_tasks, return_exceptions=True)
-
-            result = []
-            while queue_out.qsize():
-                r = await queue_out.get()
-                result.append(r)
-                queue_out.task_done()
-
-            await queue_out.join()
-            return result
-
-        result = asyncio.run(async_run(worker, tasks))
-        return result
+        return top
