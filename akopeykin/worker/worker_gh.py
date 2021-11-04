@@ -1,24 +1,16 @@
-import requests
-
 from worker.worker import Worker
+from api.requests import Requests
 
 
 class WorkerGH(Worker):
 
-    def __init__(self, tops_n: int, user: str, password: str,
+    def __init__(self, tops_n: int, requests: Requests,
                  *args, **kwargs):
-        self.auth = requests.auth.HTTPBasicAuth(user, password)
         self.tops_n = tops_n
+        self.requests = requests
 
-    def get_api_response(self, url, **kwargs) -> requests.Response:
-        params = kwargs
-        headers = {'Accept': 'application/vnd.github.v3+json'}
-        response = requests.request("GET", url,
-                                    headers=headers,
-                                    params=params,
-                                    auth=self.auth)
-        # if response.status_code != 200:
-        # print(response.status_code, response.text)
+    def get_api_response(self, url, **kwargs):
+        response = self.requests.get(url, **kwargs)
         return response
 
     def get_stars_top(self, repos: list) -> list:
