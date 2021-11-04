@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from git_app_config import db, orch, config
+from git_app_config import db, orch
 
 
 class App():
