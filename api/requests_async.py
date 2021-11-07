@@ -1,4 +1,5 @@
 import aiohttp
+import asyncio
 
 from api.requests import Requests
 
@@ -9,7 +10,7 @@ class RequestsAsync(Requests):
                  *args, **kwargs):
         self.auth = aiohttp.BasicAuth(user, password)
 
-    async def get(self, url, **kwargs):
+    async def get(self, url, mapper, **kwargs):
         params = kwargs
         headers = {'Accept': 'application/vnd.github.v3+json'}
         async with aiohttp.ClientSession() as session:
@@ -17,8 +18,5 @@ class RequestsAsync(Requests):
                                    headers=headers,
                                    params=params,
                                    auth=self.auth) as response:
-                result = {'json': await response.json()}
-                if 'next' in response.links:
-                    result['url'] = response.links['next']['url']
-
+                result = await mapper(response)
         return result

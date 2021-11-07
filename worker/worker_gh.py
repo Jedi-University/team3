@@ -9,8 +9,18 @@ class WorkerGH(Worker):
         self.tops_n = tops_n
         self.requests = requests
 
+    def get_json(self, response):
+        return response.json()
+
+    def response_mapper(self, response):
+        result = {'json': self.get_json(response)}
+        if 'next' in response.links:
+            result['url'] = response.links['next']['url']
+        return result
+
     def get_api_response(self, url, **kwargs):
-        response = self.requests.get(url, **kwargs)
+        response = self.requests.get(
+            url, mapper=self.response_mapper, **kwargs)
         return response
 
     def get_stars_top(self, repos: list) -> list:

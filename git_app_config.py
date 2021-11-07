@@ -39,7 +39,7 @@ workers = {'orgs': WorkerGHOrgs(**config),
 # orch = ProcessOrch(workers=workers, max_workers=max_workers)
 
 # treadPool
-orch = TreadOrch(workers=workers, max_workers=max_workers)
+# orch = TreadOrch(workers=workers, max_workers=max_workers)
 
 
 # Async requests
@@ -52,4 +52,4 @@ workers = {'orgs': WorkerGHOrgsAsync(**config),
            'repos': WorkerGHReposAsync(**config),
            'top': WorkerStarsTop(**config)}
 
-# orch = AsyncOrch(workers=workers)
+orch = AsyncOrch(workers=workers)

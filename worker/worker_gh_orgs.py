@@ -14,9 +14,9 @@ class WorkerGHOrgs(WorkerGH):
         orgs = []
         while len(orgs) < self.orgs_n:
             response = self.get_api_response(url, per_page=self.per_page)
-            orgs.extend(response.json())
-            if 'next' in response.links:
-                url = response.links['next']['url']
+            orgs.extend(response['json'])
+            if 'url' in response:
+                url = response['url']
             else:
                 break
         orgs = orgs[:self.orgs_n]

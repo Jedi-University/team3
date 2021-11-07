@@ -15,11 +15,11 @@ class WorkerGHRepos(WorkerGH):
 
     def run(self, url: str) -> list:
         response = self.get_api_response(url, per_page=self.per_page)
-        repos = list(map(self.repo_mapper, response.json()))
-        while 'next' in response.links:
-            url = response.links['next']['url']
+        repos = list(map(self.repo_mapper, response['json']))
+        while 'url' in response:
+            url = response['url']
             response = self.get_api_response(url)
-            cur_repos = map(self.repo_mapper, response.json())
+            cur_repos = map(self.repo_mapper, response['json'])
             repos.extend(cur_repos)
         repos = self.get_stars_top(repos)
         return repos

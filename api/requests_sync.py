@@ -8,11 +8,12 @@ class RequestsSync(Requests):
                  *args, **kwargs):
         self.auth = requests.auth.HTTPBasicAuth(user, password)
 
-    def get(self, url, **kwargs) -> requests.Response:
+    def get(self, url, mapper, **kwargs) -> requests.Response:
         params = kwargs
         headers = {'Accept': 'application/vnd.github.v3+json'}
         response = requests.request("GET", url,
                                     headers=headers,
                                     params=params,
                                     auth=self.auth)
-        return response
+        result = mapper(response)
+        return result
