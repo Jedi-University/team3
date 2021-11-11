@@ -11,15 +11,14 @@ class WorkerGHOrgsAsync(WorkerGHAsync):
 
     async def run(self) -> list:
         url = (f"https://api.github.com/organizations")
-        orgs = []
-        while len(orgs) < self.orgs_n:
+        response = await self.get_api_response(url,
+                                                per_page=self.per_page)
+        orgs = response['json']
+        while len(orgs) < self.orgs_n and 'url' in response:
+            url = response['url']
             response = await self.get_api_response(url,
                                                    per_page=self.per_page)
             orgs.extend(response['json'])
-            if 'url' in response:
-                url = response['url']
-            else:
-                break
         orgs = orgs[:self.orgs_n]
         repos_url = list(map(lambda x: x['repos_url'], orgs))
         return repos_url
