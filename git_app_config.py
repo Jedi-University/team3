@@ -16,7 +16,7 @@ from worker.worker_stars_top import WorkerStarsTop
 db_path = 'sqlalchemy.db'
 db = DB(db_path=db_path, table=Top)
 
-config_orgs_top = {'orgs_n': 2,
+config_orgs_top = {'orgs_n': 200,
                    'tops_n': 20}
 
 # Sync requests
@@ -39,7 +39,7 @@ workers = {'orgs': WorkerGHOrgs(**config),
 # orch = ProcessOrch(workers=workers, max_workers=max_workers)
 
 # treadPool
-# orch = TreadOrch(workers=workers, max_workers=max_workers)
+orch = TreadOrch(workers=workers, max_workers=max_workers)
 
 
 # Async requests
@@ -52,4 +52,4 @@ workers = {'orgs': WorkerGHOrgsAsync(**config),
            'repos': WorkerGHReposAsync(**config),
            'top': WorkerStarsTop(**config)}
 
-orch = AsyncOrch(workers=workers)
+# orch = AsyncOrch(workers=workers)
