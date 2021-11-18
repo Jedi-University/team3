@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, create_engine, delete
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from db.declarative_base import Base
+
 
 class DB():
 
@@ -9,9 +11,7 @@ class DB():
         self.engine = create_engine(f'sqlite:///{db_path}')
         self.table = table
 
-        # Base = declarative_base()
-        # Base.metadata.create_all(self.engine)
-        self.table.metadata.create_all(self.engine)
+        Base.metadata.create_all(self.engine)
         self.DBSession = sessionmaker(bind=self.engine)
 
     def delete(self):

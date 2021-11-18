@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, create_engine, delete
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-Base = declarative_base()
+from db.declarative_base import Base
 
 
 class Top(Base):
