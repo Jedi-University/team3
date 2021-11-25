@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from loguru import logger
+
 from git_app_config import db, orch
 
 
@@ -16,9 +18,12 @@ class App():
     def show(self):
         top = db.get()
 
-        print('id org_name repo_name stars_count')
-        for t in top:
-            print(t.id, t.org_name, t.repo_name, t.stars_count)
+        header = 'id, org_name, repo_name, stars_count'
+        result = [f'{t.id}, {t.org_name}, {t.repo_name}, {t.stars_count}'
+                  for t in top]
+        result = [header, *result]
+        result = '\n'.join(result)
+        logger.info(result)
 
 
 if __name__ == '__main__':
@@ -26,5 +31,5 @@ if __name__ == '__main__':
     start_time = datetime.now()
     app.fetch()
     time_delta = datetime.now() - start_time
-    print(f'seconds: {time_delta.total_seconds()}')
+    logger.info(f'seconds: {time_delta.total_seconds()}')
     app.show()

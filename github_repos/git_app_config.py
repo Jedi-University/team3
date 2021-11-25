@@ -1,3 +1,5 @@
+from loguru import logger
+
 from api.requests_async import RequestsAsync
 from api.requests_sync import RequestsSync
 from db.db import DB
@@ -12,6 +14,9 @@ from worker.worker_gh_orgs_async import WorkerGHOrgsAsync
 from worker.worker_gh_repos import WorkerGHRepos
 from worker.worker_gh_repos_async import WorkerGHReposAsync
 from worker.worker_stars_top import WorkerStarsTop
+
+logger.add('log.log', rotation='0.2 MB',
+           retention=1, enqueue=True, diagnose=True)
 
 db_path = 'sqlalchemy.db'
 db = DB(db_path=db_path, table=Top)
