@@ -8,12 +8,9 @@ from mrjob.step import MRStep
 class ClickCount(MRJob):
 
     def mapper_count_ip(self, _, line):
-        # split line str like '[2021-11-30 04:16:41.494514] 10.10.10.10'
+        # split str like '[2021-11-30 04:16:41.494514] 10.10.10.10'
         ip = line.split()[2]
         yield ip, 1
-
-    def reducer_sum(self, key, counts):
-        yield (key, sum(counts))
 
     def reducer_sum_filter(self, ip, counts):
         count = sum(counts)
