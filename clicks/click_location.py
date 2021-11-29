@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 from loguru import logger
@@ -12,9 +13,17 @@ class ClickLocation(MRJob):
     DIRS = ['api']
     FILES = ['app_config.py']
 
-    def mapper_count_ip(self, _, line):
+    def mapper_ip(self, _, line):
+        # split str like '[2021-11-30 04:16:41.494514] 10.10.10.10'
         ip = line.split()[2]
-        yield (ip, 1)
+        yield ip, None
+
+    def mapper_ip_part(self, ip, _):
+        part = int(ip.split('.')[-1]) % 10
+        yield part, (ip, 1)
+
+    def reducer_group_only(self, key, _):
+        yield key, None
 
     def reducer_sum(self, key, counts):
         yield (key, sum(counts))
@@ -23,16 +32,34 @@ class ClickLocation(MRJob):
         loc = location.get(ip)
         yield (loc, 1)
 
+    def reducer_location_by_ip_part(self, part, ip_counts):
+        # 3	[["78.186.28.73", 1], ["10.73.83.143", 1]]
+        with ThreadPoolExecutor(max_workers=100) as executor:
+            loc_counts = executor.map(lambda ip_c: (
+                location.get(ip_c[0]), ip_c[1]), ip_counts)
+        for loc, count in loc_counts:
+            yield loc, count
+
     def steps(self):
 
-        return [
-            MRStep(mapper=self.mapper_count_ip,
-                   combiner=self.reducer_sum,
-                   reducer=self.reducer_sum),
-            MRStep(mapper=self.mapper_location,
-                   combiner=self.reducer_sum,
-                   reducer=self.reducer_sum),
-        ]
+        WITH_PARTS = True
+        # WITH_PARTS = False
+
+        if WITH_PARTS:
+            return [
+                MRStep(mapper=self.mapper_ip,
+                       reducer=self.reducer_group_only),
+                MRStep(mapper=self.mapper_ip_part,
+                       reducer=self.reducer_location_by_ip_part),
+                MRStep(reducer=self.reducer_sum),
+            ]
+        else:
+            return [
+                MRStep(mapper=self.mapper_ip,
+                       reducer=self.reducer_group_only),
+                MRStep(mapper=self.mapper_location,
+                       reducer=self.reducer_sum),
+            ]
 
 
 if __name__ == '__main__':
