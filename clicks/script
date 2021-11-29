@@ -1,0 +1,4 @@
+#!/bin/bash
+python click_count.py clicks.txt -r local > grouped.txt
+python click_location.py clicks.txt -r local > location.txt
+python click_time_location.py clicks.txt -r local > time_location.txt
