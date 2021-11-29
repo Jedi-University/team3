@@ -60,8 +60,8 @@ class ClickTimeLocation(MRJob):
 
     def steps(self):
 
-        # WITH_PARTS = True
-        WITH_PARTS = False
+        WITH_PARTS = True
+        # WITH_PARTS = False
 
         if WITH_PARTS:
             return [
