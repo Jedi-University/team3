@@ -23,7 +23,8 @@ class CoinsSmaFilter:
 
         df = df_input.withColumn("partition", func.lit("1")).withColumn(
             "sma", func.mean("close").over(windowSpec))
-        df = df.filter(df['close'] > df['sma']).drop('sma', 'partition')
+        # df = df.filter(df['close'] > df['sma']).drop('sma', 'partition')
+        df = df.filter((df['close'] > df['sma']) & (df['index'] >= SMA_LENGHT)).drop('sma', 'partition')
         return df
     
     def store(self, df):
