@@ -13,7 +13,6 @@ class SparkOrch():
     def run(self) -> list:
         worker_orgs = self.workers['orgs'].run
         worker_repos = self.workers['repos'].run
-        # worker_top = self.workers['top'].run
 
         # get repo urls for organizations
         orgs_repos_url = [[url] for url in worker_orgs()]
