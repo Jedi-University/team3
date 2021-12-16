@@ -1,15 +1,11 @@
-import json
 from datetime import datetime
 from logging import log
 
 from airflow.models import DAG
-from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.providers.http.sensors.http import HttpSensor
 from airflow.providers.sqlite.hooks.sqlite import SqliteHook
 from airflow.providers.sqlite.operators.sqlite import SqliteOperator
-from pandas import json_normalize
 
 from git_app.git_app_config import worker_orgs, worker_repos
 
@@ -33,13 +29,10 @@ def _processing_repos(ti):
 
 def _insert_sqlite(ti):
     top_repos = ti.xcom_pull(task_ids='processing_repos')
-    print(top_repos)
     sqlite_hook = SqliteHook(sqlite_conn_id='sqlite_default')
     target_fields = ['id', 'org_name', 'repo_name', 'stars_count']
     rows = [(r['id'], r['org_name'], r['repo_name'], r['stars_count'])
             for r in top_repos]
-    # rows = [('133715', 'engineyard', 'ey-cloud-recipes', '1002')]
-    print(rows)
     sql = '''
         INSERT INTO top (id, org_name, repo_name, stars_count)
             VALUES (?, ?, ?, ?)
@@ -48,6 +41,7 @@ def _insert_sqlite(ti):
         sqlite_hook.run(sql, parameters=row, autocommit=True)
     # sqlite_hook.insert_rows(table='top', rows=rows,
     #                         target_fields=target_fields)
+
 
 def _show_rows(ti):
     sqlite_hook = SqliteHook(sqlite_conn_id='sqlite_default')
@@ -110,7 +104,7 @@ with DAG('git_processing', schedule_interval='@daily',
     # show_rows = SqliteOperator(
     #     task_id='show_rows',
     #     sqlite_conn_id='sqlite_default',
-    #     sql='SELECT * from top',        
+    #     sql='SELECT * from top',
     # )
 
     is_api_available >> drop_table >> creating_table >> processing_orgs
