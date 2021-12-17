@@ -45,9 +45,11 @@ def _insert_sqlite(ti):
 
 def _show_rows(ti):
     sqlite_hook = SqliteHook(sqlite_conn_id='sqlite_default')
-    sql = 'SELECT id, org_name, repo_name, stars_count FROM top'
-    result = sqlite_hook.run(sql, autocommit=True)
-    print(result)
+    sql = 'SELECT * FROM top'
+    conn = sqlite_hook.get_conn()
+    cur = conn.cursor()
+    result = cur.execute(sql).fetchall()
+    # print(result)
     return result
 
 
